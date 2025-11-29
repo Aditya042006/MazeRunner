@@ -3,7 +3,6 @@
 #include <time.h>
 #include <emscripten/emscripten.h> // <-- Import for WASM
 
-// --- Global variables to hold maze state ---
 static char* g_maze = NULL;
 static int g_N = 0;
 
@@ -12,12 +11,12 @@ static int g_N = 0;
 #define BFS_PATH '*'
 #define DFS_PATH '.'
 
-// --- Point struct (from generator.h) ---
+// --- Point struct
 typedef struct {
     int x, y;
 } Point;
 
-// --- Stack Implementation (from stack.c/stack.h) ---
+// Stack Implementation (from stack.c/stack.h)
 typedef struct StackNode {
     Point point;
     struct StackNode* next;
@@ -60,8 +59,6 @@ void destroyStack(Stack* stack) {
     free(stack);
 }
 
-// --- Maze Generator (from generator.c) ---
-// --- C89 FIX: Saare variables upar declare kiye hain ---
 void generateMaze() {
     int i; 
     Stack* stack; 
@@ -103,7 +100,7 @@ void generateMaze() {
                 g_maze[ny * g_N + nx] = PATH;
                 push(stack, cur);
                 
-                next_point.x = nx; next_point.y = ny; // C99 init fix
+                next_point.x = nx; next_point.y = ny; 
                 push(stack, next_point); 
                 break;
             }
@@ -125,13 +122,12 @@ void generateMaze() {
     }
 }
 
-// --- BFS Solver (from solver.c) ---
+// --- BFS Solver
 typedef struct Node {
     int x, y;
     struct Node* parent;
 } Node;
 
-// --- C89 FIX: Saare variables upar declare kiye hain ---
 int solveMazeBFS(Point start, Point end) {
     int* visited; 
     Node** queue; 
@@ -190,8 +186,7 @@ int solveMazeBFS(Point start, Point end) {
     return (endNode != NULL);
 }
 
-// --- DFS Solver (from solver_dfs.c) ---
-// --- C89 FIX: Saare variables upar declare kiye hain ---
+// --- DFS Solver
 int dfsRecursive(int* visited, Point cur, Point end) {
     int dirs[4][2] = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}}; 
     int i; 
@@ -218,7 +213,6 @@ int dfsRecursive(int* visited, Point cur, Point end) {
     return 0;
 }
 
-// --- C89 FIX: Saare variables upar declare kiye hain ---
 int dfsSolve(Point start, Point end) {
     int* visited; 
     int found; 
@@ -235,7 +229,6 @@ int dfsSolve(Point start, Point end) {
 }
 
 
-// --- ====== WASM EXPORTED FUNCTIONS ====== ---
 
 EMSCRIPTEN_KEEPALIVE
 void init_maze(int n) {
@@ -250,7 +243,7 @@ EMSCRIPTEN_KEEPALIVE
 void run_generation() {
     if (g_maze == NULL) return;
     generateMaze();
-    // Set start and end points to paths
+
     g_maze[1 * g_N + 1] = PATH;
     g_maze[(g_N - 2) * g_N + (g_N - 2)] = PATH;
 }
@@ -280,4 +273,5 @@ int run_solver(int solver_type) {
 EMSCRIPTEN_KEEPALIVE
 const char* get_maze_buffer() {
     return g_maze;
+
 }
